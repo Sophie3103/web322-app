@@ -1,29 +1,35 @@
 /*********************************************************************************
-WEB322 – Assignment 03
+WEB322 – Assignment 04
 I declare that this assignment is my own work in accordance with Seneca Academic Policy.  
 No part of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
 
 Name: Sofiia Parkhomenko
 Student ID: 123054215
-Date: 03/15/2025
+Date: 03/26/2025
 Vercel Web App URL: https://vercel.com/sophie3103s-projects/web322-app
 GitHub Repository URL: https://github.com/Sophie1303/web322-app.git
 
 ********************************************************************************/
+const sanitizeHtml = require("sanitize-html");
 const express = require("express");
 const path = require("path");
 const storeService = require("./store-service");
-
-const app = express();
-
-const HTTP_PORT = process.env.PORT || 8080;
-
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: true }));
-
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
+
+const app = express();
+app.set('view engine', 'ejs');
+
+app.use(express.static("public"));
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  let route = req.path.replace(/\/$/, "");
+  res.locals.activeRoute = route === "" ? "/" : route;
+  next();
+});
 
 cloudinary.config({
   cloud_name: "daxpgprze",
@@ -31,78 +37,86 @@ cloudinary.config({
   api_secret: "BmpyIgGUILXl8EGvsJJYQJtBfqg",
   secure: true
 });
-const upload = multer(); 
+
+const upload = multer();
+
+const HTTP_PORT = process.env.PORT || 8080;
 
 app.get("/", (req, res) => {
   res.redirect("/about");
 });
 
 app.get("/about", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/about.html"));
+
+  res.render("about");
 });
 
 app.get("/shop", (req, res) => {
-  storeService
-    .getPublishedItems()
-    .then((publishedItems) => {
-      res.json(publishedItems);
+  let cat = req.query.category;
+
+  const itemsPromise = cat
+    ? storeService.getPublishedItemsByCategory(cat)
+    : storeService.getPublishedItems();
+
+  const categoriesPromise = storeService.getCategories();
+
+  Promise.all([itemsPromise, categoriesPromise])
+    .then(([publishedItems, allCategories]) => {
+      res.render("shop", {
+        items: publishedItems,
+        categories: allCategories
+      });
     })
-    .catch((err) => {
-      res.json({ message: err });
+    .catch(() => {
+      res.render("shop", {
+        items: [],
+        categories: [],
+        message: "Error loading shop data."
+      });
     });
 });
 
+
 app.get("/categories", (req, res) => {
-  storeService
-    .getCategories()
-    .then((allCategories) => {
-      res.json(allCategories);
+  storeService.getCategories()
+    .then((cats) => {
+      res.render("categories", { categories: cats });
     })
-    .catch((err) => {
-      res.json({ message: err });
+    .catch(() => {
+      res.render("categories", { categories: [], message: "No results" });
     });
 });
+
 
 app.get("/items", (req, res) => {
   if (req.query.category) {
-    storeService
-      .getItemsByCategory(req.query.category)
+    storeService.getItemsByCategory(req.query.category)
       .then((filteredItems) => {
-        res.json(filteredItems);
+        res.render("items", { items: filteredItems });
       })
       .catch((err) => {
-        res.json({ message: err });
+        res.render("items", { items: [], message: "No results found." });
       });
-  }
-  else if (req.query.minDate) {
-    storeService
-      .getItemsByMinDate(req.query.minDate)
-      .then((filteredItems) => {
-        res.json(filteredItems);
-      })
-      .catch((err) => {
-        res.json({ message: err });
-      });
-  }
-  else {
-    storeService
-      .getAllItems()
+  } else {
+    storeService.getAllItems()
       .then((allItems) => {
-        res.json(allItems);
+        res.render("items", { items: allItems });
       })
       .catch((err) => {
-        res.json({ message: err });
+        res.render("items", { items: [], message: "No results found." });
       });
   }
 });
+
+
 app.get("/item/:id", (req, res) => {
   storeService
     .getItemById(req.params.id)
     .then((item) => {
-      res.json(item);
+      res.render("singleItem", { item: item });
     })
     .catch((err) => {
-      res.json({ message: err });
+      res.render("singleItem", { item: null, message: "No results found." });
     });
 });
 
@@ -138,15 +152,17 @@ app.post("/items/add", upload.single("featureImage"), (req, res) => {
 
   function processItem(imageUrl) {
     req.body.featureImage = imageUrl;
-
     storeService.addItem(req.body)
       .then(() => {
-        res.redirect("/items"); 
+        res.redirect("/items");
       })
       .catch((err) => {
         res.send(err);
       });
   }
+});
+app.get("/items/add", (req, res) => {
+  res.render("addItem"); 
 });
 
 

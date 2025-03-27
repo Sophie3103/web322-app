@@ -1,11 +1,11 @@
 /*********************************************************************************
-WEB322 – Assignment 03
+WEB322 – Assignment 04
 I declare that this assignment is my own work in accordance with Seneca Academic Policy.  
 No part of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
 
 Name: Sofiia Parkhomenko
 Student ID: 123054215
-Date: 03/15/2025
+Date: 03/26/2025
 Vercel Web App URL: https://vercel.com/sophie3103s-projects/web322-app
 GitHub Repository URL: https://github.com/Sophie1303/web322-app.git 
 
@@ -103,8 +103,10 @@ function getItemById(id) {
     else reject("no result returned");
   });
 }
+
 function addItem(itemData) {
   return new Promise((resolve, reject) => {
+
     itemData.published = itemData.published ? true : false;
 
     if (itemData.category) {
@@ -123,7 +125,18 @@ function addItem(itemData) {
   });
 }
 
-
+function getPublishedItemsByCategory(category) {
+  return new Promise((resolve, reject) => {
+    const filtered = items.filter(
+      (item) => item.published === true && item.category == category
+    );
+    if (filtered.length > 0) {
+      resolve(filtered);
+    } else {
+      reject("no results returned");
+    }
+  });
+}
 
 module.exports = {
   initialize,
@@ -133,5 +146,6 @@ module.exports = {
   addItem,
   getItemsByCategory,
   getItemsByMinDate,
-  getItemById
+  getItemById,
+  getPublishedItemsByCategory
 };

@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<div class="row">
+  <aside class="col-md-3">
+    <h4>Categories</h4>
+    <% if (categories && categories.length > 0) { %>
+      <ul>
+        <% categories.forEach(cat => { %>
+          <li>
+            <a href="/shop?category=<%= cat.id %>"><%= cat.category %></a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>No categories found.</p>
+    <% } %>
+  </aside>
+
+  <section class="col-md-9">
+    <h2>Shop</h2>
+    
+    <% if (items && items.length > 0) { %>
+      <ul class="list-unstyled">
+        <% items.forEach(item => { %>
+          <li class="mb-3">
+            <h3><%= item.title %></h3>
+            <img src="<%= item.featureImage %>" alt="<%= item.title %>" style="max-width: 200px;">
+            
+            <p>Price: $<%= item.price %></p>
+            <p>Category: <%= item.category %></p>
+            <p>Post Date: <%= item.postDate %></p>
+            <p><%= item.body || 'No description' %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p><strong><%= message || "No items found." %></strong></p>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

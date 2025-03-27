@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+
+<h2>Items</h2>
+
+<form method="GET" action="/items" class="mb-3">
+    <label for="categorySelect">Filter by Category:</label>
+    <select name="category" id="categorySelect" class="form-select" style="width: 200px; display: inline-block;">
+      <option value="">All</option>
+      <option value="1">Category 1</option>
+      <option value="2">Category 2</option>
+      <option value="3">Category 3</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </form>
+  
+
+<% if (items && items.length > 0) { %>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Date</th>
+        <th>Price</th>
+        <th>Category</th>
+        <th>Published</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% items.forEach(item => { %>
+        <tr>
+          <td><%= item.id %></td>
+          <td><%= item.title %></td>
+          <td><%= item.postDate %></td>
+          <td><%= item.price %></td>
+          <td><%= item.category %></td>
+          <td><%= item.published ? 'Yes' : 'No' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } else { %>
+  <p><strong><%= message || "No results." %></strong></p>
+<% } %>
+
+<%- include('partials/footer') %>
