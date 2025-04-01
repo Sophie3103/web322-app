@@ -1,141 +1,87 @@
 /*********************************************************************************
-WEB322 – Assignment 04
+WEB322 – Assignment 05
 I declare that this assignment is my own work in accordance with Seneca Academic Policy.  
 No part of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
 
 Name: Sofiia Parkhomenko
 Student ID: 123054215
-Date: 03/26/2025
+Date: 03/31/2025
 Vercel Web App URL: https://vercel.com/sophie3103s-projects/web322-app
 GitHub Repository URL: https://github.com/Sophie1303/web322-app.git 
 
 ********************************************************************************/
 
-const fs = require("fs");
+const { Sequelize, Op } = require('sequelize');
+const path = require('path');
 
-let items = [];
-let categories = [];
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, 'data', 'database.sqlite')  
+});
+
+const Item = require('./models/Item')(sequelize);
+const Category = require('./models/Category')(sequelize);
 
 function initialize() {
-  return new Promise((resolve, reject) => {
-    fs.readFile("./data/items.json", "utf8", (err, data) => {
-      if (err) {
-        reject("Unable to read items.json file!");
-        return;
-      }
-      try {
-        items = JSON.parse(data);
-      } catch (parseErr) {
-        reject("Error parsing items.json file!");
-        return;
-      }
-
-      fs.readFile("./data/categories.json", "utf8", (err, data) => {
-        if (err) {
-          reject("Unable to read categories.json file!");
-          return;
-        }
-        try {
-          categories = JSON.parse(data);
-        } catch (parseErr) {
-          reject("Error parsing categories.json file!");
-          return;
-        }
-        resolve("Data successfully loaded");
-      });
-    });
-  });
-}
-
-function getAllItems() {
-  return new Promise((resolve, reject) => {
-    if (items.length > 0) {
-      resolve(items);
-    } else {
-      reject("no results returned");
-    }
-  });
-}
-
-function getPublishedItems() {
-  return new Promise((resolve, reject) => {
-    const publishedItems = items.filter((item) => item.published === true);
-    if (publishedItems.length > 0) {
-      resolve(publishedItems);
-    } else {
-      reject("no results returned");
-    }
-  });
+  return sequelize.sync();
 }
 
 function getCategories() {
-  return new Promise((resolve, reject) => {
-    if (categories.length > 0) {
-      resolve(categories);
-    } else {
-      reject("no results returned");
-    }
+  return Category.findAll();
+}
+
+function getAllItems() {
+  return Item.findAll();
+}
+
+function getPublishedItems() {
+  return Item.findAll({
+    where: { published: true }
   });
 }
 
 function getItemsByCategory(category) {
-  return new Promise((resolve, reject) => {
-    const filtered = items.filter((item) => item.category == category);
-    if (filtered.length > 0) resolve(filtered);
-    else reject("no results returned");
+  return Item.findAll({
+    where: { category: category }
   });
 }
 
 function getItemsByMinDate(minDateStr) {
-  return new Promise((resolve, reject) => {
-    const filtered = items.filter(
-      (item) => new Date(item.postDate) >= new Date(minDateStr)
-    );
-    if (filtered.length > 0) resolve(filtered);
-    else reject("no results returned");
+  return Item.findAll({
+    where: {
+      postDate: {
+        [Op.gte]: minDateStr
+      }
+    }
   });
 }
 
 function getItemById(id) {
-  return new Promise((resolve, reject) => {
-    const found = items.find((itm) => itm.id == id);
-    if (found) resolve(found);
-    else reject("no result returned");
-  });
+  return Item.findByPk(id);
 }
 
 function addItem(itemData) {
-  return new Promise((resolve, reject) => {
-
-    itemData.published = itemData.published ? true : false;
-
-    if (itemData.category) {
-      itemData.category = parseInt(itemData.category);
-    }
-
-    if (!itemData.postDate) {
-      itemData.postDate = new Date().toISOString().split("T")[0];
-    }
-
-    itemData.id = items.length + 1;
-
-    items.push(itemData);
-
-    resolve(itemData);
-  });
+  itemData.published = itemData.published ? true : false;
+  if (itemData.category) {
+    itemData.category = parseInt(itemData.category);
+  }
+  if (!itemData.postDate) {
+    itemData.postDate = new Date().toISOString().split("T")[0];
+  }
+  return Item.create(itemData);
 }
 
 function getPublishedItemsByCategory(category) {
-  return new Promise((resolve, reject) => {
-    const filtered = items.filter(
-      (item) => item.published === true && item.category == category
-    );
-    if (filtered.length > 0) {
-      resolve(filtered);
-    } else {
-      reject("no results returned");
+  return Item.findAll({
+    where: {
+      published: true,
+      category: category
     }
   });
+}
+
+function addCategory(categoryData) {
+  return Category.create(categoryData);
 }
 
 module.exports = {
@@ -147,5 +93,6 @@ module.exports = {
   getItemsByCategory,
   getItemsByMinDate,
   getItemById,
-  getPublishedItemsByCategory
+  getPublishedItemsByCategory,
+  addCategory
 };

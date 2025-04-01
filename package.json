@@ -15,6 +15,9 @@
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.21.2",
-    "sanitize-html": "^2.15.0"
+    "express-ejs-layouts": "^2.5.1",
+    "sanitize-html": "^2.15.0",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
   }
 }
