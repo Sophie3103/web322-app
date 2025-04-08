@@ -1,36 +1,34 @@
-const { DataTypes } = require('sequelize');
+const mongoose = require('mongoose');
 
-module.exports = (sequelize) => {
-  return sequelize.define('Item', {
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    price: {
-      type: DataTypes.DECIMAL,
-      allowNull: false
-    },
-    postDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-      defaultValue: DataTypes.NOW
-    },
-    published: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
-    },
-    category: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    body: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    featureImage: {
-      type: DataTypes.STRING,
-      allowNull: true
-    }
-  });
-};
+const itemSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  postDate: {
+    type: Date,
+    default: Date.now
+  },
+  published: {
+    type: Boolean,
+    default: false
+  },
+  category: {
+    type: String, 
+    default: ''
+  },
+  body: {
+    type: String,
+    default: ''
+  },
+  featureImage: {
+    type: String,
+    default: ''
+  }
+});
+
+module.exports = mongoose.model('Item', itemSchema);

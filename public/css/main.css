@@ -1,61 +1,62 @@
 body {
-    background-color: #ce607a;
-    font-family: Arial, sans-serif; 
-    margin-top: 80px; 
-    color: #333; 
-  }
-  
-  .navbar {
-    background-color: #6b123f !important; 
-  }
-  
-  .navbar-brand {
-    font-weight: bold;
-    font-size: 1.5rem;
-    color: #8a2e2e !important; 
-  }
-  
-  .nav-link {
-    color: #5a0e0e !important;
-    font-weight: 600;
-    margin-right: 0.5rem;
-  }
-  
-  .nav-link:hover {
-    background-color: #f0116a !important; 
-    color: #2c2c2c !important;
-    border-radius: 4px;
-  }
-  
-  /* 3. Headings */
-  h1, h2, h3 {
-    font-family: "Comic Sans MS", cursive, sans-serif; 
-    color: #ff69b4; 
-    margin-top: 1rem;
-  }
-  
-  .col-md-6, .col-md-3, .col-md-9 {
-    padding: 1rem;
-    border-radius: 8px;
-    background-color: rgba(97, 15, 15, 0.8); 
-    margin-bottom: 1rem;
-  }
-  
-  p {
-    line-height: 1.6;
-    margin-bottom: 1rem;
-  }
-  
-  a {
-    color: #ff69b4;
-    text-decoration: underline;
-  }
-  a:hover {
-    color: #e60073; 
-  }
-  
-  aside {
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
+  background-color: #a77cf8; 
+  color: #caaee4;            
+  font-family: Arial, sans-serif;
+  margin-top: 80px; 
+}
+
+/* Navbar */
+.navbar {
+  background-color: #8c67fa !important; 
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #55495c !important; 
+}
+
+.nav-link {
+  color: #3b3541 !important;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.nav-link:hover {
+  background-color: #725ec0 !important;
+  color: #e0d1f5 !important;
+  border-radius: 4px;
+}
+
+h1, h2, h3 {
+  color: #4b4658;
+  margin-top: 1rem;
+  font-family: "Comic Sans MS", cursive, sans-serif; 
+}
+
+.col-md-3, .col-md-6, .col-md-9 {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background-color: rgba(215, 200, 245, 0.4); 
+}
+
+/* Paragraphs */
+p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Links */
+a {
+  color: #ab6df3;
+  text-decoration: underline;
+}
+a:hover {
+  color: #b16bf1; 
+}
+
+aside {
+  background-color: rgba(215, 200, 245, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

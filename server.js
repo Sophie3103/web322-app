@@ -1,11 +1,11 @@
 /*********************************************************************************
-WEB322 – Assignment 05
+WEB322 – Assignment 06
 I declare that this assignment is my own work in accordance with Seneca Academic Policy.  
 No part of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
 
 Name: Sofiia Parkhomenko
 Student ID: 123054215
-Date: 03/31/2025
+Date: 04/07/2025
 Vercel Web App URL: https://vercel.com/sophie3103s-projects/web322-app
 GitHub Repository URL: https://github.com/Sophie1303/web322-app.git
 
@@ -13,7 +13,7 @@ GitHub Repository URL: https://github.com/Sophie1303/web322-app.git
 const sanitizeHtml = require("sanitize-html");
 const express = require("express");
 const path = require("path");
-const storeService = require("./store-service");
+const storeService = require("./store-service");  
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
@@ -28,7 +28,6 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use((req, res, next) => {
   let route = req.path.replace(/\/$/, "");
   res.locals.activeRoute = route === "" ? "/" : route;
@@ -41,10 +40,7 @@ cloudinary.config({
   api_secret: "BmpyIgGUILXl8EGvsJJYQJtBfqg",
   secure: true
 });
-
 const upload = multer();
-
-const HTTP_PORT = process.env.PORT || 8080;
 
 app.get("/", (req, res) => {
   res.redirect("/about");
@@ -68,7 +64,7 @@ app.get("/shop", (req, res) => {
         items: publishedItems,
         categories: allCategories,
         message: publishedItems.length > 0 ? null : "No items found."
-    });    
+      });
     })
     .catch(() => {
       res.render("shop", {
@@ -83,21 +79,20 @@ app.get("/shop", (req, res) => {
 app.get("/categories", (req, res) => {
   storeService.getCategories()
     .then((cats) => {
-      res.render("categories", { 
-        title: "Categories", 
+      res.render("categories", {
+        title: "Categories",
         categories: cats,
         message: cats.length ? null : "No categories found."
       });
     })
     .catch(() => {
-      res.render("categories", { 
-        title: "Categories", 
-        categories: [], 
+      res.render("categories", {
+        title: "Categories",
+        categories: [],
         message: "Error loading categories."
       });
     });
 });
-
 
 app.get("/items", (req, res) => {
   const categoryQuery = req.query.category;
@@ -115,29 +110,32 @@ app.get("/items", (req, res) => {
     });
   })
   .catch(() => {
-    res.render("items", { 
-      title: "Items List", 
-      items: [], 
+    res.render("items", {
+      title: "Items List",
+      items: [],
       categories: [],
       message: "Error loading items."
     });
   });
 });
 
-
 app.get("/item/:id", (req, res) => {
   storeService.getItemById(req.params.id)
     .then((item) => {
-      res.render("singleItem", { title: "Item Details", item: item });
+      if (item) {
+        res.render("singleItem", { title: "Item Details", item });
+      } else {
+        res.render("singleItem", { title: "Item Details", item: null, message: "No results found." });
+      }
     })
-    .catch((err) => {
+    .catch(() => {
       res.render("singleItem", { title: "Item Details", item: null, message: "No results found." });
     });
 });
 
 app.get("/items/add", (req, res) => {
   storeService.getCategories()
-    .then(categories => {
+    .then((categories) => {
       res.render("addItem", { title: "Add Item", categories });
     })
     .catch(() => {
@@ -150,11 +148,8 @@ app.post("/items/add", upload.single("featureImage"), (req, res) => {
     let streamUpload = (req) => {
       return new Promise((resolve, reject) => {
         let stream = cloudinary.uploader.upload_stream((error, result) => {
-          if (result) {
-            resolve(result);
-          } else {
-            reject(error);
-          }
+          if (result) resolve(result);
+          else reject(error);
         });
         streamifier.createReadStream(req.file.buffer).pipe(stream);
       });
@@ -170,7 +165,7 @@ app.post("/items/add", upload.single("featureImage"), (req, res) => {
         processItem(uploaded.url);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
         processItem("");
       });
   } else {
@@ -193,31 +188,40 @@ app.use((req, res) => {
   res.status(404).send("Page Not Found");
 });
 
-storeService.initialize().then(async () => {
-  const existingItems = require('./data/items.json');
+storeService.initialize()
+  .then(async () => {
+    console.log("MongoDB Atlas connected!");
 
-  const existingCategories = [
-    { id: 1, category: 'Home, Garden' },
-    { id: 2, category: 'Electronics, Computers, Video Games' },
-    { id: 3, category: 'Clothing' },
-    { id: 4, category: 'Sports & Outdoors' },
-    { id: 5, category: 'Pets' }
-  ];
+    const existingItems = require("./data/items.json");
+    const existingCategories = [
+      { id: 1, category: "Home, Garden" },
+      { id: 2, category: "Electronics, Computers, Video Games" },
+      { id: 3, category: "Clothing" },
+      { id: 4, category: "Sports & Outdoors" },
+      { id: 5, category: "Pets" }
+    ];
 
-  const categoryCount = await storeService.getCategories();
-  if(categoryCount.length === 0) {
-    await Promise.all(existingCategories.map(cat => storeService.addCategory(cat)));
-    console.log("Categories imported successfully!");
-  }
+    const catCount = await storeService.getCategories();
+    if (catCount.length === 0) {
+      for (let c of existingCategories) {
+        await storeService.addCategory(c);
+      }
+      console.log("Categories imported successfully!");
+    }
 
-  const itemsCount = await storeService.getAllItems();
-  if(itemsCount.length === 0) {
-    await Promise.all(existingItems.map(item => storeService.addItem(item)));
-    console.log("Items imported successfully!");
-  }
+    const itemCount = await storeService.getAllItems();
+    if (itemCount.length === 0) {
+      for (let i of existingItems) {
+        await storeService.addItem(i);
+      }
+      console.log("Items imported successfully!");
+    }
 
-  app.listen(HTTP_PORT, () => {
-    console.log("Express HTTP server listening on port " + HTTP_PORT);
+    const HTTP_PORT = process.env.PORT || 8080;
+    app.listen(HTTP_PORT, () => {
+      console.log("Express HTTP server listening on port " + HTTP_PORT);
+    });
+  })
+  .catch((err) => {
+    console.error("Unable to start server:", err);
   });
-}).catch(err => console.log("Unable to start server: ", err));
-
